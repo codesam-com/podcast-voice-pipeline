@@ -16,8 +16,14 @@ try:
     import transformers  # noqa: F401
 except ImportError as exc:
     raise RuntimeError(
-        "Falta la dependencia 'transformers'. "
-        "Añádela en el workflow dentro de 'Install WhisperX runtime dependencies'."
+        "Falta la dependencia 'transformers'."
+    ) from exc
+
+try:
+    import nltk  # noqa: F401
+except ImportError as exc:
+    raise RuntimeError(
+        "Falta la dependencia 'nltk'. Añádela al workflow."
     ) from exc
 
 import whisperx
