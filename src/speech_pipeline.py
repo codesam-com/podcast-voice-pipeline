@@ -12,6 +12,14 @@ if not hasattr(torchaudio, "AudioMetaData"):
         "Fija torch/torchaudio a 2.3.1 en el workflow."
     )
 
+try:
+    import transformers  # noqa: F401
+except ImportError as exc:
+    raise RuntimeError(
+        "Falta la dependencia 'transformers'. "
+        "Añádela en el workflow dentro de 'Install WhisperX runtime dependencies'."
+    ) from exc
+
 import whisperx
 from pyannote.audio import Pipeline
 
