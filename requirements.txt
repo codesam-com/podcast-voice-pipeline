@@ -1,17 +1,9 @@
-## requirements.txt
-
-```txt
-openai-whisper
-whisperx
-pyannote.audio
-pydub
-ffmpeg-python
-soundfile
-librosa
-numpy
-scipy
-pandas
-click
-tqdm
-orjson
-jiwer
+whisperx==3.3.1
+pyannote.audio==3.3.2
+ffmpeg-python==0.2.0
+numpy==1.26.4
+pandas==2.2.3
+soundfile==0.12.1
+librosa==0.10.2.post1
+pydub==0.25.1
+tqdm==4.66.5
