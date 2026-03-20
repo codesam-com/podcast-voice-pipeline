@@ -6,7 +6,7 @@ from typing import Dict, List
 
 from .ffmpeg_utils import convert_to_wav_mono_16k, extract_segment
 from .io_utils import ensure_dir, write_json, write_text
-from .speech_pipeline import run_whisperx_transcription, run_pyannote_diarization, merge_transcript_and_diarization
+from .speech_pipeline import run_transcription, run_pyannote_diarization, merge_transcript_and_diarization
 from .srt_utils import build_srt
 from .voice_profile import build_voice_profile, profile_to_markdown
 
@@ -62,15 +62,15 @@ def main():
     print(f"[1/6] Convirtiendo audio a WAV: {paths['input_mp3']}")
     convert_to_wav_mono_16k(paths["input_mp3"], paths["wav_path"])
 
-    print("[2/6] Ejecutando transcripción con WhisperX")
-    aligned = run_whisperx_transcription(paths["wav_path"], language="es")
-    write_json(paths["full_dir"] / "aligned_transcript.json", aligned)
+    print("[2/6] Ejecutando transcripción con faster-whisper")
+    transcript = run_transcription(paths["wav_path"], language="es")
+    write_json(paths["full_dir"] / "transcript_raw.json", transcript)
 
     print("[3/6] Ejecutando diarización con pyannote")
     diarization = run_pyannote_diarization(paths["wav_path"])
 
     print("[4/6] Uniendo transcripción + diarización")
-    merged = merge_transcript_and_diarization(aligned, diarization)
+    merged = merge_transcript_and_diarization(transcript, diarization)
     write_json(paths["full_dir"] / "transcript.json", merged)
 
     full_entries = [
