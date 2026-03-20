@@ -74,7 +74,8 @@ jobs:
 
       - name: Run pipeline
         env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_HUB_DISABLE_IMPLICIT_TOKEN: "1"
+          PYANNOTE_HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           python -m src.main --audio-id "${{ github.event.inputs.audio_id }}"
 
