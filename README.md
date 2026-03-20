@@ -1,5 +1,7 @@
 # podcast-voice-pipeline
 
+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
+
 Pipeline open source para:
 
 - transcripción de audio
