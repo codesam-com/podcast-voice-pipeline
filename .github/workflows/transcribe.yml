@@ -51,7 +51,16 @@ jobs:
             sentencepiece==0.2.0 \
             huggingface-hub==0.24.6 \
             accelerate==0.34.2 \
-            einops==0.8.0
+            einops==0.8.0 \
+            nltk==3.9.1
+
+      - name: Download NLTK data
+        run: |
+          python - <<'PY'
+          import nltk
+          nltk.download("punkt")
+          nltk.download("punkt_tab")
+          PY
 
       - name: Install pyannote runtime dependencies
         run: |
