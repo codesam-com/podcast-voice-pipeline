@@ -68,6 +68,16 @@ jobs:
           print("librosa:", librosa.__version__)
           PY
 
+      - name: Debug pyannote signature
+        run: |
+          python - <<'PY'
+          import inspect
+          import pyannote.audio
+          from pyannote.audio import Pipeline
+          print("pyannote.audio version:", getattr(pyannote.audio, "__version__", "unknown"))
+          print("Pipeline.from_pretrained signature:", inspect.signature(Pipeline.from_pretrained))
+          PY
+
       - name: Validate input audio
         run: |
           test -f "inputs/${{ github.event.inputs.audio_id }}/${{ github.event.inputs.audio_id }}.mp3"
