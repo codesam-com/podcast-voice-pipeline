@@ -37,11 +37,32 @@ jobs:
             torchaudio==2.3.1 \
             torchvision==0.18.1
 
-      - name: Install project dependencies
+      - name: Install base project dependencies
         run: |
           pip install --no-deps -r requirements.txt
-          pip install faster-whisper==1.0.3 ctranslate2==4.4.0
-          pip install pyannote.core pyannote.database pyannote.metrics pyannote.pipeline pytorch-lightning lightning speechbrain
+
+      - name: Install WhisperX runtime dependencies
+        run: |
+          pip install \
+            faster-whisper==1.0.3 \
+            ctranslate2==4.4.0 \
+            transformers==4.44.2 \
+            tokenizers==0.19.1 \
+            sentencepiece==0.2.0 \
+            huggingface-hub==0.24.6 \
+            accelerate==0.34.2 \
+            einops==0.8.0
+
+      - name: Install pyannote runtime dependencies
+        run: |
+          pip install \
+            pyannote.core \
+            pyannote.database \
+            pyannote.metrics \
+            pyannote.pipeline \
+            pytorch-lightning \
+            lightning \
+            speechbrain
 
       - name: Debug installed versions
         run: |
@@ -49,10 +70,12 @@ jobs:
           import sys
           import torch
           import torchaudio
+          import transformers
           print("Python:", sys.version)
           print("Torch:", torch.__version__)
           print("Torchaudio:", torchaudio.__version__)
           print("Has AudioMetaData:", hasattr(torchaudio, "AudioMetaData"))
+          print("Transformers:", transformers.__version__)
           PY
 
       - name: Validate input audio
