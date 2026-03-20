@@ -1,18 +1,18 @@
-# podcast-voice-pipeline
-
-Pipeline open source para:
-- transcribir audio en español
-- diarizar hablantes
-- generar subtítulos `.srt`
-- crear `.srt` por hablante
-- separar audio por hablante
-- generar fichas vocales en `.md` y `.json`
-
-## Estructura de entrada
-
-Coloca cada audio dentro de su propio directorio en `inputs/`.
-
-Ejemplo:
-
-```text
-inputs/test001/test001.mp3
+podcast-voice-pipeline/
+├─ .github/
+│  └─ workflows/
+│     └─ transcribe.yml
+├─ src/
+│  ├─ main.py
+│  ├─ io_utils.py
+│  ├─ ffmpeg_utils.py
+│  ├─ speech_pipeline.py
+│  ├─ diarization_utils.py
+│  ├─ srt_utils.py
+│  ├─ voice_profile.py
+│  └─ __init__.py
+├─ requirements.txt
+├─ README.md
+├─ .gitignore
+└─ inputs/
+   └─ .gitkeep
