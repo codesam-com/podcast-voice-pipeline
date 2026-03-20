@@ -11,9 +11,6 @@ from .diarization_utils import diarization_to_segments, assign_speakers_to_trans
 
 
 def run_transcription(audio_wav: Path, language: str = "es") -> Dict[str, Any]:
-    # No pasamos token a faster-whisper.
-    # El modelo es público y queremos evitar que Hugging Face use
-    # implícitamente un token expirado del entorno.
     model = WhisperModel(
         "small",
         device="cpu",
@@ -62,10 +59,17 @@ def run_pyannote_diarization(audio_wav: Path) -> Any:
     if not hf_token:
         raise RuntimeError("Missing PYANNOTE_HF_TOKEN environment variable.")
 
-    pipeline = Pipeline.from_pretrained(
-        "pyannote/speaker-diarization-community-1",
-        token=hf_token,
-    )
+    try:
+        pipeline = Pipeline.from_pretrained(
+            "pyannote/speaker-diarization-community-1",
+            token=hf_token,
+        )
+    except TypeError:
+        pipeline = Pipeline.from_pretrained(
+            "pyannote/speaker-diarization-community-1",
+            use_auth_token=hf_token,
+        )
+
     return pipeline(str(audio_wav))
 
 
