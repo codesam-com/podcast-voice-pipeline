@@ -80,11 +80,13 @@ jobs:
           import torch
           import torchaudio
           import transformers
+          import nltk
           print("Python:", sys.version)
           print("Torch:", torch.__version__)
           print("Torchaudio:", torchaudio.__version__)
           print("Has AudioMetaData:", hasattr(torchaudio, "AudioMetaData"))
           print("Transformers:", transformers.__version__)
+          print("NLTK:", nltk.__version__)
           PY
 
       - name: Validate input audio
