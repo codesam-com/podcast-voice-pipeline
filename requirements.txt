@@ -1,0 +1,17 @@
+## requirements.txt
+
+```txt
+openai-whisper
+whisperx
+pyannote.audio
+pydub
+ffmpeg-python
+soundfile
+librosa
+numpy
+scipy
+pandas
+click
+tqdm
+orjson
+jiwer
