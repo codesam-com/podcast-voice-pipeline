@@ -2,7 +2,15 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict
+
+import torchaudio
+
+if not hasattr(torchaudio, "AudioMetaData"):
+    raise RuntimeError(
+        "La versión instalada de torchaudio no es compatible con pyannote.audio. "
+        "Fija torch/torchaudio a 2.3.1 en el workflow."
+    )
 
 import whisperx
 from pyannote.audio import Pipeline
