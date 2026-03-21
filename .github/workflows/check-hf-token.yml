@@ -1,0 +1,66 @@
+name: Check Hugging Face token
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check-token:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install requests
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Check token against Hugging Face API
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          python - <<'PY'
+          import os
+          import sys
+          import requests
+
+          token = os.environ.get("HF_TOKEN", "").strip()
+
+          if not token:
+              print("ERROR: HF_TOKEN no existe o está vacío en GitHub Secrets.")
+              sys.exit(1)
+
+          headers = {"Authorization": f"Bearer {token}"}
+
+          print("1) Comprobando identidad del token...")
+          whoami = requests.get("https://huggingface.co/api/whoami-v2", headers=headers, timeout=30)
+
+          if whoami.status_code != 200:
+              print(f"ERROR: el token no es válido. Status: {whoami.status_code}")
+              print(whoami.text)
+              sys.exit(1)
+
+          user_data = whoami.json()
+          print("OK: token válido.")
+          print("Usuario:", user_data.get("name") or user_data.get("fullname") or "desconocido")
+
+          print("\n2) Comprobando acceso al modelo gated de pyannote...")
+          model_url = "https://huggingface.co/api/models/pyannote/speaker-diarization-community-1"
+          model_resp = requests.get(model_url, headers=headers, timeout=30)
+
+          if model_resp.status_code == 200:
+              print("OK: el token tiene acceso al modelo pyannote/speaker-diarization-community-1")
+              sys.exit(0)
+
+          print(f"ERROR: el token NO tiene acceso al modelo. Status: {model_resp.status_code}")
+          print(model_resp.text)
+          print("\nPosibles causas:")
+          print("- No has aceptado las condiciones del modelo con esa misma cuenta.")
+          print("- El token pertenece a otra cuenta.")
+          print("- El token está mal copiado o caducado.")
+          sys.exit(1)
+          PY
