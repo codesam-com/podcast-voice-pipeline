@@ -59,22 +59,14 @@ def run_pyannote_diarization(audio_wav: Path) -> Any:
     if not pipeline_dir:
         raise RuntimeError(
             "Falta PYANNOTE_PIPELINE_DIR. El workflow debe descargar "
-            "pyannote/speaker-diarization-community-1 en local antes de ejecutar Python."
+            "pyannote/speaker-diarization-community-1 en local."
         )
 
     pipeline_path = Path(pipeline_dir)
     if not pipeline_path.exists():
-        raise RuntimeError(
-            f"No existe el pipeline local de pyannote en: {pipeline_path}"
-        )
+        raise RuntimeError(f"No existe el pipeline local de pyannote en: {pipeline_path}")
 
-    config_path = pipeline_path / "config.yaml"
-    if not config_path.exists():
-        raise RuntimeError(
-            f"No existe config.yaml dentro del pipeline local: {config_path}"
-        )
-
-    pipeline = Pipeline.from_pretrained(str(config_path))
+    pipeline = Pipeline.from_pretrained(str(pipeline_path))
     return pipeline(str(audio_wav))
 
 
