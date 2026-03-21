@@ -65,6 +65,14 @@ jobs:
           rm -rf /tmp/pyannote-speaker-diarization-community-1
           git clone https://__token__:${HF_TOKEN}@huggingface.co/pyannote/speaker-diarization-community-1 /tmp/pyannote-speaker-diarization-community-1
 
+      - name: Inspect pyannote local files
+        run: |
+          echo "Contenido del directorio clonado:"
+          ls -lah /tmp/pyannote-speaker-diarization-community-1
+          echo
+          echo "Buscando config.yaml:"
+          test -f /tmp/pyannote-speaker-diarization-community-1/config.yaml          
+
       - name: Run pipeline
         env:
           HF_HUB_DISABLE_IMPLICIT_TOKEN: "1"
