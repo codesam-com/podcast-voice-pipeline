@@ -68,7 +68,13 @@ def run_pyannote_diarization(audio_wav: Path) -> Any:
             f"No existe el pipeline local de pyannote en: {pipeline_path}"
         )
 
-    pipeline = Pipeline.from_pretrained(str(pipeline_path))
+    config_path = pipeline_path / "config.yaml"
+    if not config_path.exists():
+        raise RuntimeError(
+            f"No existe config.yaml dentro del pipeline local: {config_path}"
+        )
+
+    pipeline = Pipeline.from_pretrained(str(config_path))
     return pipeline(str(audio_wav))
 
 
