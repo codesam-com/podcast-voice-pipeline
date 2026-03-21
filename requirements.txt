@@ -1,5 +1,6 @@
 faster-whisper==1.0.3
-pyannote.audio==4.0.1
+pyannote.audio==4.0.4
+torchmetrics==1.6.1
 ffmpeg-python==0.2.0
 numpy==1.26.4
 pandas==2.2.3
