@@ -57,17 +57,39 @@ def run_transcription(audio_wav: Path, language: str = "es") -> Dict[str, Any]:
 def run_pyannote_diarization(audio_wav: Path) -> Any:
     hf_token = os.environ.get("PYANNOTE_HF_TOKEN")
     if not hf_token:
-        raise RuntimeError("Missing PYANNOTE_HF_TOKEN environment variable.")
+        raise RuntimeError(
+            "Falta PYANNOTE_HF_TOKEN. Añade el secret HF_TOKEN en GitHub Actions."
+        )
+
+    pipeline = None
+    load_errors = []
 
     try:
         pipeline = Pipeline.from_pretrained(
             "pyannote/speaker-diarization-community-1",
             token=hf_token,
         )
-    except TypeError:
-        pipeline = Pipeline.from_pretrained(
-            "pyannote/speaker-diarization-community-1",
-            use_auth_token=hf_token,
+    except TypeError as exc:
+        load_errors.append(f"token=: {exc}")
+        try:
+            pipeline = Pipeline.from_pretrained(
+                "pyannote/speaker-diarization-community-1",
+                use_auth_token=hf_token,
+            )
+        except Exception as exc2:
+            load_errors.append(f"use_auth_token=: {exc2}")
+    except Exception as exc:
+        load_errors.append(f"token=: {exc}")
+
+    if pipeline is None:
+        details = "\n".join(load_errors) if load_errors else "sin detalle adicional"
+        raise RuntimeError(
+            "No se pudo cargar pyannote/speaker-diarization-community-1.\n"
+            "Comprueba estas 3 cosas:\n"
+            "1) el token de Hugging Face no está expirado,\n"
+            "2) el usuario del token ha aceptado las condiciones del modelo gated,\n"
+            "3) el secret HF_TOKEN del repo contiene ese token correcto.\n\n"
+            f"Detalles capturados:\n{details}"
         )
 
     return pipeline(str(audio_wav))
