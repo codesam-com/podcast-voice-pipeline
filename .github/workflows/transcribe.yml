@@ -66,7 +66,7 @@ jobs:
           print("Torch:", torch.__version__)
           print("Torchaudio:", torchaudio.__version__)
           print("Has AudioMetaData:", hasattr(torchaudio, "AudioMetaData"))
-          print("faster-whisper:", faster_whisper.__version__)
+          print("faster-whisper:", getattr(faster_whisper, "__version__", "unknown"))
           print("librosa:", librosa.__version__)
           print("pyannote.audio:", getattr(pyannote.audio, "__version__", "unknown"))
           PY
@@ -75,12 +75,17 @@ jobs:
         run: |
           test -f "inputs/${{ github.event.inputs.audio_id }}/${{ github.event.inputs.audio_id }}.mp3"
 
-      - name: Download pyannote pipeline locally
+      - name: Login to Hugging Face
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
+          pip install huggingface_hub
+          huggingface-cli login --token "$HF_TOKEN"
+
+      - name: Download pyannote pipeline locally
+        run: |
           rm -rf /tmp/pyannote-speaker-diarization-community-1
-          git clone https://oauth2:${HF_TOKEN}@hf.co/pyannote/speaker-diarization-community-1 /tmp/pyannote-speaker-diarization-community-1
+          git clone https://hf.co/pyannote/speaker-diarization-community-1 /tmp/pyannote-speaker-diarization-community-1
 
       - name: Run pipeline
         env:
