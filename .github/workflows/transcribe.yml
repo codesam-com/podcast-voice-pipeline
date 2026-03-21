@@ -31,10 +31,11 @@ jobs:
       - name: Upgrade pip
         run: |
           python -m pip install --upgrade pip setuptools wheel
+          pip install uv
 
-      - name: Install project dependencies
+      - name: Install project dependencies with uv
         run: |
-          pip install -r requirements.txt
+          uv pip install --system -r requirements.txt
 
       - name: Validate input audio
         run: |
@@ -60,10 +61,12 @@ jobs:
           import pyannote.audio
           import soundfile
           import librosa
+          import torchmetrics
 
           print("Python:", sys.version)
           print("faster-whisper:", getattr(faster_whisper, "__version__", "unknown"))
           print("pyannote.audio:", getattr(pyannote.audio, "__version__", "unknown"))
+          print("torchmetrics:", torchmetrics.__version__)
           print("soundfile:", soundfile.__version__)
           print("librosa:", librosa.__version__)
           PY
