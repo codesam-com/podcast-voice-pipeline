@@ -20,7 +20,8 @@ jobs:
       - name: Install system packages
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg
+          sudo apt-get install -y ffmpeg git-lfs
+          git lfs install
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -60,32 +61,31 @@ jobs:
           import torchaudio
           import faster_whisper
           import librosa
+          import pyannote.audio
           print("Python:", sys.version)
           print("Torch:", torch.__version__)
           print("Torchaudio:", torchaudio.__version__)
           print("Has AudioMetaData:", hasattr(torchaudio, "AudioMetaData"))
           print("faster-whisper:", faster_whisper.__version__)
           print("librosa:", librosa.__version__)
-          PY
-
-      - name: Debug pyannote signature
-        run: |
-          python - <<'PY'
-          import inspect
-          import pyannote.audio
-          from pyannote.audio import Pipeline
-          print("pyannote.audio version:", getattr(pyannote.audio, "__version__", "unknown"))
-          print("Pipeline.from_pretrained signature:", inspect.signature(Pipeline.from_pretrained))
+          print("pyannote.audio:", getattr(pyannote.audio, "__version__", "unknown"))
           PY
 
       - name: Validate input audio
         run: |
           test -f "inputs/${{ github.event.inputs.audio_id }}/${{ github.event.inputs.audio_id }}.mp3"
 
+      - name: Download pyannote pipeline locally
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          rm -rf /tmp/pyannote-speaker-diarization-community-1
+          git clone https://oauth2:${HF_TOKEN}@hf.co/pyannote/speaker-diarization-community-1 /tmp/pyannote-speaker-diarization-community-1
+
       - name: Run pipeline
         env:
           HF_HUB_DISABLE_IMPLICIT_TOKEN: "1"
-          PYANNOTE_HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          PYANNOTE_PIPELINE_DIR: /tmp/pyannote-speaker-diarization-community-1
         run: |
           python -m src.main --audio-id "${{ github.event.inputs.audio_id }}"
 
