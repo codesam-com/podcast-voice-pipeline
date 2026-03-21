@@ -24,20 +24,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install huggingface_hub
 
-      - name: Login to Hugging Face via Python
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: |
-          python - <<'PY'
-          from huggingface_hub import login
-          import os
-
-          token = os.environ["HF_TOKEN"]
-          login(token=token, add_to_git_credential=True)
-          print("Login OK")
-          PY
-
-      - name: Test access to model via API
+      - name: Test access via API
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
@@ -47,13 +34,15 @@ jobs:
 
           api = HfApi(token=os.environ["HF_TOKEN"])
           info = api.model_info("pyannote/speaker-diarization-community-1")
-          print("Model access OK:", info.id if hasattr(info, "id") else info.modelId)
+          print("Model access OK:", getattr(info, "id", getattr(info, "modelId", "unknown")))
           PY
 
-      - name: Clone model via git
+      - name: Clone model via git with token in URL
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           rm -rf test_model
-          git clone https://hf.co/pyannote/speaker-diarization-community-1 test_model
+          git clone https://__token__:${HF_TOKEN}@huggingface.co/pyannote/speaker-diarization-community-1 test_model
 
       - name: Verify files downloaded
         run: |
