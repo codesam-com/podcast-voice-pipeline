@@ -33,23 +33,31 @@ def run_transcription(audio_wav: Path, language: str = "es") -> Dict[str, Any]:
             for w in seg.words:
                 if w.start is None or w.end is None:
                     continue
-                words.append({
-                    "start": float(w.start),
-                    "end": float(w.end),
-                    "word": (w.word or "").strip(),
-                    "probability": float(w.probability) if w.probability is not None else None,
-                })
 
-        out_segments.append({
-            "id": len(out_segments),
-            "start": float(seg.start),
-            "end": float(seg.end),
-            "text": (seg.text or "").strip(),
-            "words": words,
-        })
+                words.append(
+                    {
+                        "start": float(w.start),
+                        "end": float(w.end),
+                        "word": (w.word or "").strip(),
+                        "probability": float(w.probability) if w.probability is not None else None,
+                    }
+                )
+
+        out_segments.append(
+            {
+                "id": len(out_segments),
+                "start": float(seg.start),
+                "end": float(seg.end),
+                "text": (seg.text or "").strip(),
+                "words": words,
+            }
+        )
+
+    detected_language = getattr(info, "language", None)
 
     return {
-        "language": language if language else getattr(info, "language", None),
+        "language": language or detected_language,
+        "detected_language": detected_language,
         "segments": out_segments,
     }
 
@@ -64,19 +72,32 @@ def run_pyannote_diarization(audio_wav: Path) -> Any:
 
     pipeline_path = Path(pipeline_dir)
     if not pipeline_path.exists():
-        raise RuntimeError(f"No existe el pipeline local de pyannote en: {pipeline_path}")
+        raise RuntimeError(
+            f"No existe el pipeline local de pyannote en: {pipeline_path}"
+        )
+
+    config_path = pipeline_path / "config.yaml"
+    if not config_path.exists():
+        raise RuntimeError(
+            f"No existe config.yaml dentro del pipeline local: {config_path}"
+        )
 
     pipeline = Pipeline.from_pretrained(str(pipeline_path))
-    return pipeline(str(audio_wav))
+    diarization = pipeline(str(audio_wav))
+    return diarization
 
 
-def merge_transcript_and_diarization(transcript: Dict[str, Any], diarization_result: Any) -> Dict[str, Any]:
+def merge_transcript_and_diarization(
+    transcript: Dict[str, Any], diarization_result: Any
+) -> Dict[str, Any]:
     speaker_segments = diarization_to_segments(diarization_result)
     transcript_segments = transcript.get("segments", [])
+
     merged = assign_speakers_to_transcript(transcript_segments, speaker_segments)
 
     return {
         "language": transcript.get("language"),
+        "detected_language": transcript.get("detected_language"),
         "speaker_segments": speaker_segments,
         "segments": merged,
     }
