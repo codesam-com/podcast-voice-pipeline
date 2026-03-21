@@ -14,29 +14,45 @@ jobs:
           sudo apt-get install -y git-lfs
           git lfs install
 
-      - name: Install Hugging Face CLI
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install Hugging Face Hub
         run: |
+          python -m pip install --upgrade pip
           pip install huggingface_hub
 
-      - name: Login to Hugging Face
+      - name: Login to Hugging Face via Python
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          echo "Logging into Hugging Face..."
-          huggingface-cli login --token "$HF_TOKEN"
+          python - <<'PY'
+          from huggingface_hub import login
+          import os
 
-      - name: Test access to model (API)
+          token = os.environ["HF_TOKEN"]
+          login(token=token, add_to_git_credential=True)
+          print("Login OK")
+          PY
+
+      - name: Test access to model via API
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           python - <<'PY'
           from huggingface_hub import HfApi
-          api = HfApi()
+          import os
+
+          api = HfApi(token=os.environ["HF_TOKEN"])
           info = api.model_info("pyannote/speaker-diarization-community-1")
-          print("Model access OK:", info.modelId)
+          print("Model access OK:", info.id if hasattr(info, "id") else info.modelId)
           PY
 
       - name: Clone model via git
         run: |
-          echo "Cloning model..."
+          rm -rf test_model
           git clone https://hf.co/pyannote/speaker-diarization-community-1 test_model
 
       - name: Verify files downloaded
