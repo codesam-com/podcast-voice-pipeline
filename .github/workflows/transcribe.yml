@@ -53,39 +53,17 @@ jobs:
             speechbrain \
             lazy_loader
 
-      - name: Debug installed versions
-        run: |
-          python - <<'PY'
-          import sys
-          import torch
-          import torchaudio
-          import faster_whisper
-          import librosa
-          import pyannote.audio
-          print("Python:", sys.version)
-          print("Torch:", torch.__version__)
-          print("Torchaudio:", torchaudio.__version__)
-          print("Has AudioMetaData:", hasattr(torchaudio, "AudioMetaData"))
-          print("faster-whisper:", getattr(faster_whisper, "__version__", "unknown"))
-          print("librosa:", librosa.__version__)
-          print("pyannote.audio:", getattr(pyannote.audio, "__version__", "unknown"))
-          PY
-
       - name: Validate input audio
         run: |
           test -f "inputs/${{ github.event.inputs.audio_id }}/${{ github.event.inputs.audio_id }}.mp3"
 
-      - name: Login to Hugging Face
+      # 🔥 CLAVE: descarga autenticada correcta
+      - name: Download pyannote pipeline locally
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          pip install huggingface_hub
-          huggingface-cli login --token "$HF_TOKEN"
-
-      - name: Download pyannote pipeline locally
-        run: |
           rm -rf /tmp/pyannote-speaker-diarization-community-1
-          git clone https://hf.co/pyannote/speaker-diarization-community-1 /tmp/pyannote-speaker-diarization-community-1
+          git clone https://__token__:${HF_TOKEN}@huggingface.co/pyannote/speaker-diarization-community-1 /tmp/pyannote-speaker-diarization-community-1
 
       - name: Run pipeline
         env:
